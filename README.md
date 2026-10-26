@@ -13,3 +13,14 @@ Las incorrectas siempre dan susto; las correctas, con un 25 % de probabilidad (`
 Cambiar `--base` obliga a reimprimir (la dirección va dentro del QR). El orden de las opciones es estable entre ejecuciones.
 
 `vendor/` lleva `segno` (generador de QR, sin dependencias) porque este equipo no tiene `pip`.
+
+## La calavera del aula (`docs/calavera.html`)
+
+Pantalla para el aula: una calavera que habla (voz del navegador), con humor negro. Reacciona al volumen del micrófono
+(alboroto, silencio, golpes) y suelta frases al azar. El sonido no se graba ni se envía: solo se mide el volumen.
+
+- Dirección: `https://freuma.github.io/halloween-qr/calavera.html` (añadir `?debug` para ver el nivel del micro).
+- Abrir en Chrome, pulsar «Despertar» y aceptar el micrófono. Teclas: Espacio (hablar), V (cambiar de voz),
+  D (nivel), M (micrófono sí/no), +/− (sensibilidad), F (pantalla completa).
+- `frases.js`: todas las frases por categoría (bienvenida, ruido, golpe, silencio, aleatoria).
+- `calavera-logica.js`: cuándo habla; sin dependencias del navegador.

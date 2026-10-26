@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050505">
+<title>La calavera</title>
+<style>
+  :root { --hueso:#e9e2cc; --brasa:#ff5a1f; --fondo:#050505; }
+  * { box-sizing:border-box; margin:0; }
+  html, body { height:100%; background:var(--fondo); color:var(--hueso); overflow:hidden;
+    font-family: Georgia, "Times New Roman", serif; }
+  body { position:relative; }
+
+  /* Fondo: luz tenue y niebla que se desliza despacio */
+  .luz { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 42%, #2a1206 0%, #0b0503 45%, #050505 75%); }
+  .niebla { position:absolute; left:-30%; width:160%; height:45%; opacity:.5; filter:blur(30px);
+    background:radial-gradient(ellipse at 30% 50%, rgba(160,150,135,.22), transparent 60%), radial-gradient(ellipse at 75% 55%, rgba(160,150,135,.16), transparent 55%); }
+  .niebla.a { bottom:-8%; animation: desliza 46s ease-in-out infinite alternate; }
+  .niebla.b { bottom:12%; opacity:.3; animation: desliza 63s ease-in-out infinite alternate-reverse; }
+  @keyframes desliza { from { transform:translateX(-6%) } to { transform:translateX(6%) } }
+
+  /* Calavera */
+  #escena { position:absolute; inset:0 0 18% 0; display:flex; align-items:center; justify-content:center; }
+  #calavera { height:82%; width:auto; max-width:92vw; filter:drop-shadow(0 0 40px rgba(255,90,31,.18)); transform-origin:50% 70%; }
+  #calavera.lunge { animation: lunge .55s cubic-bezier(.2,.9,.3,1); }
+  @keyframes lunge { 0% { transform:scale(1) } 30% { transform:scale(1.32) } 100% { transform:scale(1) } }
+  .brillo { animation: pulso 3.2s ease-in-out infinite alternate; }
+  .habla .brillo { animation-duration:.9s; }
+  @keyframes pulso { from { opacity:.55 } to { opacity:1 } }
+  #pupilas { transition: transform .7s ease-in-out; }
+
+  /* Velas */
+  .vela { position:absolute; bottom:20%; width:7vmin; }
+  .vela.i { left:9%; } .vela.d { right:9%; }
+  .llama { transform-origin:50% 100%; animation: parpadeo 2.1s ease-in-out infinite; }
+  .vela.d .llama { animation-duration:2.7s; animation-delay:-.8s; }
+  @keyframes parpadeo { 0%,100% { transform:scaleY(1) skewX(0) } 30% { transform:scaleY(1.12) skewX(3deg) } 55% { transform:scaleY(.92) skewX(-3deg) } 80% { transform:scaleY(1.06) skewX(2deg) } }
+
+  /* Subtítulo */
+  #texto { position:absolute; left:6%; right:6%; bottom:3%; height:15%; display:flex; align-items:center; justify-content:center;
+    text-align:center; font-style:italic; font-size:clamp(20px, 3.8vmin, 56px); line-height:1.3; color:var(--hueso);
+    text-shadow:0 0 18px rgba(255,90,31,.45); opacity:0; transition:opacity .6s; }
+  #texto.visible { opacity:1; }
+
+  /* Pantalla de inicio */
+  #inicio { position:absolute; inset:0; z-index:5; background:#050505; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:24px; cursor:pointer; }
+  #inicio h1 { font-weight:normal; font-size:clamp(28px, 6vmin, 64px); letter-spacing:.06em; color:var(--brasa); margin-bottom:22px; }
+  #inicio p { max-width:560px; font-size:clamp(16px, 2.4vmin, 24px); line-height:1.5; margin-bottom:10px; }
+  #inicio .tenue { color:#8a8578; font-size:clamp(13px, 1.9vmin, 18px); }
+  #inicio .boton { margin-top:26px; padding:14px 34px; border:1px solid var(--brasa); color:var(--brasa); font-size:clamp(18px,2.6vmin,26px); letter-spacing:.08em; animation: pulso 2.2s ease-in-out infinite alternate; }
+
+  /* Ayuda y nivel */
+  #ayuda { position:absolute; right:14px; bottom:8px; z-index:3; font:13px/1.5 monospace; color:#6f6a5e; text-align:right; transition:opacity 1.5s; }
+  #nivel { position:absolute; left:14px; top:12px; z-index:3; font:13px/1.5 monospace; color:#9d9788; display:none; }
+  #nivel .barra { width:200px; height:8px; background:#222; margin:4px 0; position:relative; }
+  #nivel .barra i { position:absolute; left:0; top:0; bottom:0; background:#7fb069; }
+  #nivel .barra u { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--brasa); }
+
+  @media (prefers-reduced-motion: reduce) { .niebla, .llama { animation:none; } }
+</style>
+</head>
+<body>
+
+<div class="luz"></div>
+<div class="niebla b"></div>
+
+<div id="escena">
+<svg id="calavera" viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg" aria-label="Una calavera">
+  <defs>
+    <radialGradient id="hueso" cx="50%" cy="38%" r="62%"><stop offset="0" stop-color="#f6f0dc"/><stop offset=".7" stop-color="#b8b09a"/><stop offset="1" stop-color="#6b6454"/></radialGradient>
+    <linearGradient id="mandi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfc8b2"/><stop offset="1" stop-color="#7d7664"/></linearGradient>
+    <radialGradient id="ascua" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff2a0"/><stop offset=".35" stop-color="#ff5a1f"/><stop offset="1" stop-color="#ff2a00" stop-opacity="0"/></radialGradient>
+  </defs>
+  <!-- boca (hueco) -->
+  <ellipse cx="200" cy="322" rx="78" ry="46" fill="#000"/>
+  <!-- mandíbula -->
+  <g id="mandibula">
+    <path d="M120 316h160v36q0 32-40 32h-80q-40 0-40-32z" fill="url(#mandi)"/>
+    <g fill="#ece6d2" stroke="#4a4435" stroke-width="1.5">
+      <rect x="128" y="316" width="21" height="26" rx="3"/><rect x="151" y="316" width="21" height="28" rx="3"/>
+      <rect x="174" y="316" width="21" height="29" rx="3"/><rect x="197" y="316" width="21" height="29" rx="3"/>
+      <rect x="220" y="316" width="21" height="28" rx="3"/><rect x="243" y="316" width="21" height="26" rx="3"/>
+    </g>
+  </g>
+  <!-- cráneo -->
+  <path d="M200 22C108 22 52 90 52 168c0 52 20 84 54 104q0 22 22 22h144q22 0 22-22c34-20 54-52 54-104C348 90 292 22 200 22z" fill="url(#hueso)"/>
+  <path d="M96 66q22-24 56-30M262 40q40 12 62 52M174 24q-8 36 10 56M290 120l-14 24 12 18" fill="none" stroke="#4a4435" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+  <!-- dientes superiores -->
+  <g fill="#f1ebd8" stroke="#4a4435" stroke-width="1.5">
+    <rect x="128" y="290" width="21" height="30" rx="3"/><rect x="151" y="290" width="21" height="33" rx="3"/>
+    <rect x="174" y="290" width="21" height="34" rx="3"/><rect x="197" y="290" width="21" height="34" rx="3"/>
+    <rect x="220" y="290" width="21" height="33" rx="3"/><rect x="243" y="290" width="21" height="30" rx="3"/>
+  </g>
+  <!-- cuencas y ojos -->
+  <ellipse cx="138" cy="170" rx="44" ry="55" fill="#000"/><ellipse cx="262" cy="170" rx="44" ry="55" fill="#000"/>
+  <g id="pupilas">
+    <circle class="brillo" cx="138" cy="178" r="26" fill="url(#ascua)"/><circle class="brillo" cx="262" cy="178" r="26" fill="url(#ascua)"/>
+  </g>
+  <path d="M200 214l-21 52h42z" fill="#000"/>
+</svg>
+</div>
+
+<div class="niebla a"></div>
+
+<!-- velas -->
+<svg class="vela i" viewBox="0 0 40 120" aria-hidden="true">
+  <path class="llama" d="M20 4C30 22 34 32 20 44C6 32 10 22 20 4z" fill="#ff8a2a"/><path class="llama" d="M20 20C25 30 26 36 20 42C14 36 15 30 20 20z" fill="#ffe27a"/>
+  <rect x="11" y="46" width="18" height="70" rx="3" fill="#cdbf9c"/><ellipse cx="20" cy="116" rx="17" ry="4" fill="#2a2418"/>
+</svg>
+<svg class="vela d" viewBox="0 0 40 120" aria-hidden="true">
+  <path class="llama" d="M20 4C30 22 34 32 20 44C6 32 10 22 20 4z" fill="#ff8a2a"/><path class="llama" d="M20 20C25 30 26 36 20 42C14 36 15 30 20 20z" fill="#ffe27a"/>
+  <rect x="11" y="46" width="18" height="70" rx="3" fill="#cdbf9c"/><ellipse cx="20" cy="116" rx="17" ry="4" fill="#2a2418"/>
+</svg>
+
+<div id="texto" aria-live="polite"></div>
+
+<div id="nivel">
+  <div id="nivelInfo"></div>
+  <div class="barra"><i id="nivelBarra"></i><u id="nivelUmbral"></u></div>
+</div>
+<div id="ayuda">Espacio: hablar · V: cambiar de voz · D: nivel · M: micrófono · +/−: sensibilidad · F: pantalla completa</div>
+
+<div id="inicio">
+  <h1>La calavera</h1>
+  <p>Pulsa para despertarla. Con altavoces y micrófono, reacciona al ruido y al silencio del aula.</p>
+  <p class="tenue">El navegador pedirá permiso para usar el micrófono. El sonido no se graba ni se envía a ningún sitio: solo se mide el volumen.</p>
+  <div class="boton">Despertar</div>
+</div>
+
+<script src="frases.js"></script>
+<script src="calavera-logica.js"></script>
+<script>
+(function () {
+  var L = CalaveraLogica;
+  var cerebro = new L.Cerebro();
+  var bolsas = {};
+  for (var k in FRASES) bolsas[k] = new L.Bolsa(FRASES[k]);
+
+  var $ = function (id) { return document.getElementById(id); };
+  var calavera = $("calavera"), mandibula = $("mandibula"), pupilas = $("pupilas"), texto = $("texto");
+
+  var ctx = null, analizador = null, datos = null;
+  var microOk = false, microActivo = true, hablando = false, debug = /[?&]debug/.test(location.search);
+  var apertura = 0, empuje = 0, vozIdx = 0, ultimoEvento = "-", ultimoNivel = 0;
+  var timerTexto = null, timerSeguridad = null;
+
+  /* ---- Voz ---- */
+  function voces() {
+    var todas = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    var es = todas.filter(function (v) { return /^es/i.test(v.lang); });
+    es.sort(function (a, b) { return (/es[-_]ES/i.test(b.lang) ? 1 : 0) - (/es[-_]ES/i.test(a.lang) ? 1 : 0); });
+    return es;
+  }
+
+  function mostrar(frase, ms) {
+    texto.textContent = frase;
+    texto.className = "visible";
+    clearTimeout(timerTexto);
+    timerTexto = setTimeout(function () { texto.className = ""; }, ms);
+  }
+
+  function hablar(frase) {
+    if (hablando) return;
+    hablando = true;
+    calavera.classList.add("habla");
+    var duracionEstimada = Math.max(3500, frase.length * 95);
+    mostrar(frase, duracionEstimada + 3500);
+
+    function fin() {
+      if (!hablando) return;
+      hablando = false;
+      calavera.classList.remove("habla");
+      clearTimeout(timerSeguridad);
+    }
+    /* Algunos navegadores no avisan al terminar: red de seguridad. */
+    timerSeguridad = setTimeout(fin, duracionEstimada + 4000);
+
+    var lista = voces();
+    if (!window.speechSynthesis || !lista.length) { setTimeout(fin, duracionEstimada); return; }
+    var u = new SpeechSynthesisUtterance(frase);
+    u.lang = "es-ES";
+    u.voice = lista[vozIdx % lista.length];
+    u.pitch = 0.35; u.rate = 0.82; u.volume = 1;
+    u.onboundary = function () { empuje = 1; };
+    u.onend = fin; u.onerror = fin;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }
+
+  function decir(categoria) {
+    ultimoEvento = categoria;
+    if (categoria === "golpe") sacudir();
+    hablar(bolsas[categoria].siguiente());
+  }
+
+  /* ---- Efectos ---- */
+  function golpeSordo() {
+    if (!ctx) return;
+    try {
+      var t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(35, t + .35);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.9, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .45);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + .5);
+    } catch (e) {}
+  }
+  function sacudir() {
+    calavera.classList.remove("lunge"); void calavera.getBoundingClientRect(); calavera.classList.add("lunge");
+    golpeSordo();
+  }
+
+  /* ---- Animación de la mandíbula y de la mirada ---- */
+  function animar(ms) {
+    var objetivo = hablando ? 0.18 + 0.5 * Math.abs(Math.sin(ms / 95)) * (0.6 + 0.4 * Math.sin(ms / 430)) + empuje * 0.35 : 0;
+    empuje *= 0.82;
+    apertura += (objetivo - apertura) * 0.35;
+    mandibula.setAttribute("transform", "translate(0," + (apertura * 34).toFixed(1) + ")");
+    requestAnimationFrame(animar);
+  }
+  setInterval(function () {
+    pupilas.style.transform = "translate(" + (Math.random() * 14 - 7).toFixed(1) + "px," + (Math.random() * 8 - 4).toFixed(1) + "px)";
+  }, 2600);
+
+  /* ---- Micrófono: solo se mide el volumen ---- */
+  function iniciarMicro() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.resolve(false);
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } })
+      .then(function (flujo) {
+        analizador = ctx.createAnalyser();
+        analizador.fftSize = 4096;
+        datos = new Float32Array(analizador.fftSize);
+        ctx.createMediaStreamSource(flujo).connect(analizador);   /* no se conecta a los altavoces */
+        return true;
+      })
+      .catch(function () { return false; });
+  }
+
+  function nivelActual() {
+    analizador.getFloatTimeDomainData(datos);
+    var s = 0;
+    for (var i = 0; i < datos.length; i++) s += datos[i] * datos[i];
+    return Math.sqrt(s / datos.length);
+  }
+
+  function bucle() {
+    var ahora = Date.now(), ev;
+    if (microOk && microActivo) {
+      ultimoNivel = nivelActual();
+      ev = cerebro.muestra(ultimoNivel, ahora, hablando);
+    } else {
+      ev = cerebro.sinMicro(ahora, hablando);
+    }
+    if (ev && !(hablando && ev !== "golpe")) {
+      if (hablando) { speechSynthesis.cancel(); hablando = false; }
+      decir(ev);
+    }
+    if (debug) pintarNivel();
+  }
+
+  function pintarNivel() {
+    var u = cerebro.umbral();
+    $("nivelInfo").textContent = "micro: " + (microOk ? (microActivo ? "activo" : "apagado") : "no disponible") +
+      " · nivel " + ultimoNivel.toFixed(3) + " · umbral " + u.toFixed(3) + " · sens ×" + cerebro.o.sensibilidad.toFixed(2) +
+      " · último: " + ultimoEvento + (voces().length ? " · voz: " + voces()[vozIdx % voces().length].name : " · sin voz");
+    $("nivelBarra").style.width = Math.min(100, ultimoNivel * 400) + "%";
+    $("nivelUmbral").style.left = Math.min(100, u * 400) + "%";
+  }
+
+  function mostrarDebug(si) {
+    debug = si; $("nivel").style.display = si ? "block" : "none";
+  }
+
+  /* ---- Arranque ---- */
+  function despertar() {
+    $("inicio").remove();
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC(); if (ctx.resume) ctx.resume();
+    } catch (e) {}
+    try { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); } catch (e) {}
+    try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
+
+    if (window.speechSynthesis) speechSynthesis.getVoices();
+    mostrarDebug(debug);
+    iniciarMicro().then(function (ok) { microOk = ok; });   /* puede tardar si piden permiso: no bloquea nada */
+    setTimeout(function () { decir("bienvenida"); }, 900);
+    setInterval(bucle, 50);
+    requestAnimationFrame(animar);
+    setTimeout(function () { $("ayuda").style.opacity = 0; }, 12000);
+  }
+  $("inicio").addEventListener("click", despertar);
+
+  /* Ratón oculto cuando no se mueve */
+  var timerRaton;
+  document.addEventListener("mousemove", function () {
+    document.body.style.cursor = "default"; clearTimeout(timerRaton);
+    timerRaton = setTimeout(function () { document.body.style.cursor = "none"; }, 3000);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (!ctx) return;
+    var k = e.key.toLowerCase();
+    if (k === " ") { e.preventDefault(); if (hablando) { speechSynthesis.cancel(); hablando = false; } decir("aleatoria"); }
+    else if (k === "d") mostrarDebug(!debug);
+    else if (k === "m") { microActivo = !microActivo; mostrar(microActivo ? "Os oigo." : "Me he quedado sordo. Qué descanso.", 3500); }
+    else if (k === "v") { vozIdx++; var v = voces(); if (v.length) { if (hablando) { speechSynthesis.cancel(); hablando = false; } hablar("Esta es mi voz: " + v[vozIdx % v.length].name.replace(/\(.*?\)/g, "")); } }
+    else if (k === "+" || k === "=") cerebro.o.sensibilidad = Math.min(4, cerebro.o.sensibilidad * 1.25);
+    else if (k === "-") cerebro.o.sensibilidad = Math.max(0.25, cerebro.o.sensibilidad / 1.25);
+    else if (k === "f") { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
+  });
+
+  if (window.speechSynthesis) speechSynthesis.onvoiceschanged = function () {};
+})();
+</script>
+</body>
+</html>
