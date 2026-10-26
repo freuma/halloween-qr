@@ -7,17 +7,21 @@
       sensibilidad: 1,       // >1: reacciona con menos ruido
       silencioSeg: 45,       // sin ruido durante tanto tiempo -> frase de silencio
       enfriamientoSeg: 18,   // pausa mínima tras hablar, salvo golpes
-      golpeEnfriaSeg: 8,
+      golpeEnfriaSeg: 5,
+      picoMinimo: 0.10,      // un golpe necesita al menos este pico (0-1)
+      picoRelativo: 3.5,     // y superar tantas veces el pico medio de los últimos segundos
+      cresta: 4.5,           // pico / volumen medio: los golpes son muy puntuales, la voz no
       muestrasRuido: 30,     // muestras altas en 3 s para contar como alboroto (a 20 Hz = 1,5 s)
       aleatoriaMinSeg: 70,
       aleatoriaMaxSeg: 160,
-      calentamiento: 100     // muestras antes de empezar a reaccionar (5 s a 20 Hz)
+      calentamiento: 40      // muestras antes de empezar a reaccionar (2 s a 20 Hz)
     };
     for (var k in opciones) o[k] = opciones[k];
     this.o = o;
     this.hist = [];
     this.altos = [];
     this.prev = 0;
+    this._picoLento = 0;
     this.ultimoRuido = null;
     this.ultimaHabla = -1e12;
     this.ultimoGolpe = -1e12;
@@ -28,6 +32,17 @@
 
   Cerebro.prototype.umbral = function () {
     return Math.max(0.025, this._baseline * 2.5) / this.o.sensibilidad;
+  };
+
+  /* Pico necesario ahora mismo para que algo cuente como golpe. */
+  Cerebro.prototype.umbralPico = function () {
+    return Math.max(this.o.picoMinimo, this._picoLento * this.o.picoRelativo) / this.o.sensibilidad;
+  };
+
+  Cerebro.prototype.estado = function (ahora, hablando) {
+    if (hablando || ahora - this.ultimaHabla < 1200) return 'hablando';
+    if (this.hist.length < this.o.calentamiento) return 'calentando';
+    return 'escuchando';
   };
 
   Cerebro.prototype._actualizarBase = function () {
@@ -41,8 +56,10 @@
   };
 
   /* Devuelve null, 'golpe', 'ruido', 'silencio' o 'aleatoria'. */
-  Cerebro.prototype.muestra = function (nivel, ahora, hablando) {
+  /* nivel: volumen medio (0-1). pico: valor máximo de la señal en el mismo instante (0-1). */
+  Cerebro.prototype.muestra = function (nivel, ahora, hablando, pico) {
     var o = this.o;
+    if (pico === undefined) pico = nivel;
     if (this.ultimoRuido === null) { this.ultimoRuido = ahora; this._programar(ahora); }
 
     /* El altavoz de la calavera no cuenta como ruido del aula (ni su cola de eco). */
@@ -59,7 +76,11 @@
     if (alto) { this.ultimoRuido = ahora; this.altos.push(ahora); }
     while (this.altos.length && this.altos[0] < ahora - 3000) this.altos.shift();
 
-    var golpe = nivel > Math.max(u * 3, 0.12) && this.prev < u * 1.5;
+    /* Golpe: pico alto frente al pico medio reciente (vale aunque haya ruido de fondo)
+       y muy puntual (pico mucho mayor que el volumen medio). */
+    var cresta = nivel > 1e-4 ? pico / nivel : 99;
+    var golpe = pico > this.umbralPico() && (pico === nivel || cresta > o.cresta);
+    this._picoLento += (Math.min(pico, Math.max(this._picoLento * 2, 0.05)) - this._picoLento) * 0.03;
     this.prev = nivel;
 
     if (golpe && ahora - this.ultimoGolpe > o.golpeEnfriaSeg * 1000) {

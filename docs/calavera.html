@@ -144,7 +144,7 @@
   var ctx = null, analizador = null, datos = null;
   var microOk = false, microActivo = true, hablando = false, debug = /[?&]debug/.test(location.search);
   var apertura = 0, empuje = 0, vozIdx = 0, ultimoEvento = "-", ultimoNivel = 0;
-  var timerTexto = null, timerSeguridad = null;
+  var timerTexto = null, timerSeguridad = null, picoMax = 0;
 
   /* ---- Voz ---- */
   function voces() {
@@ -236,10 +236,12 @@
       .catch(function () { return false; });
   }
 
+  var ultimoPico = 0;
   function nivelActual() {
     analizador.getFloatTimeDomainData(datos);
-    var s = 0;
-    for (var i = 0; i < datos.length; i++) s += datos[i] * datos[i];
+    var s = 0, p = 0;
+    for (var i = 0; i < datos.length; i++) { var a = Math.abs(datos[i]); s += a * a; if (a > p) p = a; }
+    ultimoPico = p;
     return Math.sqrt(s / datos.length);
   }
 
@@ -247,7 +249,7 @@
     var ahora = Date.now(), ev;
     if (microOk && microActivo) {
       ultimoNivel = nivelActual();
-      ev = cerebro.muestra(ultimoNivel, ahora, hablando);
+      ev = cerebro.muestra(ultimoNivel, ahora, hablando, ultimoPico);
     } else {
       ev = cerebro.sinMicro(ahora, hablando);
     }
@@ -260,8 +262,12 @@
 
   function pintarNivel() {
     var u = cerebro.umbral();
+    picoMax = Math.max(ultimoPico, picoMax * 0.97);
     $("nivelInfo").textContent = "micro: " + (microOk ? (microActivo ? "activo" : "apagado") : "no disponible") +
-      " · nivel " + ultimoNivel.toFixed(3) + " · umbral " + u.toFixed(3) + " · sens ×" + cerebro.o.sensibilidad.toFixed(2) +
+      " · " + cerebro.estado(Date.now(), hablando) +
+      " · nivel " + ultimoNivel.toFixed(3) + " · umbral " + u.toFixed(3) +
+      " · pico " + ultimoPico.toFixed(2) + " (máx " + picoMax.toFixed(2) + ") · pico para golpe " + cerebro.umbralPico().toFixed(2) +
+      " · sens ×" + cerebro.o.sensibilidad.toFixed(2) +
       " · último: " + ultimoEvento + (voces().length ? " · voz: " + voces()[vozIdx % voces().length].name : " · sin voz");
     $("nivelBarra").style.width = Math.min(100, ultimoNivel * 400) + "%";
     $("nivelUmbral").style.left = Math.min(100, u * 400) + "%";
