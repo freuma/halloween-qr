@@ -1,0 +1,62 @@
+[
+  {
+    "texto": "Duermo de día colgado boca abajo y de noche vuelo sin hacer ruido. No soy un pájaro, pero tengo alas, y veo en la oscuridad con las orejas.",
+    "correcta": "Un murciélago",
+    "falsas": ["Un búho", "Un vampiro", "Un cuervo"],
+    "premio": "Cuelga boca abajo mientras te observa. Ahora mismo."
+  },
+  {
+    "texto": "Quien se asoma a mí se ve a sí mismo, menos los vampiros. No tengo voz, pero repito cada gesto que haces.",
+    "correcta": "Un espejo",
+    "falsas": ["Un retrato", "Una fotografía", "Un pozo"],
+    "premio": "Si algún día no te ves en él, no mires atrás."
+  },
+  {
+    "texto": "Tengo ojos y no veo, tengo boca y no como. Por fuera me tallan, por dentro me prenden una luz, y en octubre todos me quieren en su puerta.",
+    "correcta": "Una calabaza",
+    "falsas": ["Una calavera", "Un farol", "Una máscara"],
+    "premio": "Lleva toda la noche sonriendo. Nadie sabe por qué."
+  },
+  {
+    "texto": "Tengo manos y no aplaudo, tengo cara y no sonrío. Cuando mis dos manos apuntan hacia arriba, empieza la hora de las brujas.",
+    "correcta": "Un reloj",
+    "falsas": ["Una campana", "Un esqueleto", "Una estatua"],
+    "premio": "Tic, tac. Alguien más cuenta contigo."
+  },
+  {
+    "texto": "Te sigo a todas partes sin que me llames, no peso nada y desaparezco cuando se apaga la luz. A veces creo que llego antes que tú.",
+    "correcta": "Tu sombra",
+    "falsas": ["Un fantasma", "El eco", "Un espíritu"],
+    "premio": "Por cierto, ¿has mirado la tuya? Se ha movido sola."
+  },
+  {
+    "texto": "Lloro, pero no tengo ojos. Cuanto más viva estoy, más me acorto, y mis lágrimas son de cera.",
+    "correcta": "Una vela",
+    "falsas": ["Una cerilla", "Una antorcha", "Una linterna"],
+    "premio": "Se apaga sin que nadie sople. Fíjate bien."
+  },
+  {
+    "texto": "Dentro de ti me llevas toda la vida. Tengo 206 piezas y ni un trozo de piel. Sin mí serías un charco.",
+    "correcta": "El esqueleto",
+    "falsas": ["Una calavera", "Una momia", "Un zombi"],
+    "premio": "Ahora mismo estás de pie gracias a él. No le des motivos."
+  },
+  {
+    "texto": "No tengo cuerpo ni nadie me ha visto jamás, pero todos me han sentido en el estómago. Con la luz apagada, crezco.",
+    "correcta": "El miedo",
+    "falsas": ["Un monstruo", "El frío", "El silencio"],
+    "premio": "Y esto solo era un acertijo."
+  },
+  {
+    "texto": "De día soy un vecino cualquiera que saluda en la escalera. Cuando sale la luna llena, aúllo y ya no recuerdo nada.",
+    "correcta": "Un hombre lobo",
+    "falsas": ["Un lobo", "Un vampiro", "Un zombi"],
+    "premio": "Hoy hay luna. Mira por la ventana."
+  },
+  {
+    "texto": "Tengo ocho patas y ocho ojos. Tejo sin aguja, y mi cena llega sola a mi trampa.",
+    "correcta": "Una araña",
+    "falsas": ["Un escorpión", "Un ciempiés", "Un pulpo"],
+    "premio": "Hay una en tu habitación. Siempre la hay."
+  }
+]
