@@ -5,7 +5,7 @@
   function Cerebro(opciones) {
     var o = {
       sensibilidad: 1,       // >1: reacciona con menos ruido
-      silencioSeg: 45,       // sin ruido durante tanto tiempo -> frase de silencio
+      silencioSeg: 45,       // sin ruido durante tanto tiempo -> frase de silencio (0 = no despertar por silencio)
       enfriamientoSeg: 18,   // pausa mínima tras hablar, salvo golpes
       golpeEnfriaSeg: 5,
       picoMinimo: 0.10,      // un golpe necesita al menos este pico (0-1)
@@ -91,7 +91,7 @@
     if (ahora - this.ultimaHabla < o.enfriamientoSeg * 1000) return null;
 
     if (this.altos.length >= o.muestrasRuido) { this.altos = []; this.ultimaHabla = ahora; return 'ruido'; }
-    if (ahora - this.ultimoRuido > o.silencioSeg * 1000) { this.ultimoRuido = ahora; this.ultimaHabla = ahora; return 'silencio'; }
+    if (o.silencioSeg > 0 && ahora - this.ultimoRuido > o.silencioSeg * 1000) { this.ultimoRuido = ahora; this.ultimaHabla = ahora; return 'silencio'; }
     if (ahora >= this.siguienteAleatoria) { this._programar(ahora); this.ultimaHabla = ahora; return 'aleatoria'; }
     return null;
   };

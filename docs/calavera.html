@@ -131,7 +131,7 @@
 
 <div id="inicio">
   <h1>La calavera</h1>
-  <p>Pulsa para dejarla lista. La pantalla se queda negra: la calavera aparecerá sola, con un grito, cuando oiga ruido, un golpe o un largo silencio.</p>
+  <p>Pulsa para dejarla lista. La pantalla se queda negra: la calavera aparecerá sola, con un grito, cuando oiga ruido o un golpe, y de vez en cuando por sorpresa.</p>
   <p class="tenue">El navegador pedirá permiso para usar el micrófono. El sonido no se graba ni se envía a ningún sitio: solo se mide el volumen.</p>
   <div class="boton">Despertar</div>
 </div>
@@ -141,7 +141,7 @@
 <script>
 (function () {
   var L = CalaveraLogica;
-  var cerebro = new L.Cerebro({ enfriamientoSeg: 25 });
+  var cerebro = new L.Cerebro({ enfriamientoSeg: 25, silencioSeg: 0 });
   var bolsas = {};
   for (var k in FRASES) bolsas[k] = new L.Bolsa(FRASES[k]);
 

@@ -16,12 +16,12 @@ Cambiar `--base` obliga a reimprimir (la dirección va dentro del QR). El orden 
 
 ## La calavera del aula (`docs/calavera.html`)
 
-Pantalla para el aula: en reposo está **toda negra**. Cuando el micrófono oye un alboroto, un golpe o un largo silencio
+Pantalla para el aula: en reposo está **toda negra**. Cuando el micrófono oye un alboroto o un golpe
 (o, de vez en cuando, por sorpresa) aparece una calavera con un grito, dice una frase de humor negro (voz del navegador)
 y se esconde otra vez. El sonido no se graba ni se envía: solo se mide el volumen. La primera vez saluda.
 
 - Dirección: `https://freuma.github.io/halloween-qr/calavera.html` (añadir `?debug` para ver el nivel del micro).
 - Abrir en Chrome, pulsar «Despertar» y aceptar el micrófono. Teclas: Espacio (despertarla ya), V (cambiar de voz),
   D (nivel), M (micrófono sí/no), +/− (sensibilidad), F (pantalla completa).
-- `frases.js`: todas las frases por categoría (bienvenida, ruido, golpe, silencio, aleatoria).
+- `frases.js`: todas las frases por categoría (bienvenida, ruido, golpe, silencio, aleatoria). Las de «silencio» no se usan: el silencio no la despierta (`silencioSeg: 0` en `calavera.html`; poner 45 para reactivarlo).
 - `calavera-logica.js`: cuándo habla; sin dependencias del navegador.
