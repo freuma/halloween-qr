@@ -47,6 +47,24 @@
     text-shadow:0 0 18px rgba(255,90,31,.45); opacity:0; transition:opacity .6s; }
   #texto.visible { opacity:1; }
 
+  /* Modo juego (?juego): en reposo se ve un acertijo con un QR por opción; la calavera lo tapa cuando alguien responde */
+  #acertijo { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:3vmin 4vw; background:radial-gradient(ellipse at 50% 30%, #1d0e05 0%, #0a0503 55%, #050505 100%); }
+  body.juego #acertijo { display:flex; }
+  #acertijo .cab { color:var(--brasa); letter-spacing:.35em; text-transform:uppercase; font-size:clamp(14px, 2.4vmin, 30px); }
+  #acertijo .num { font-size:clamp(34px, 8vmin, 96px); line-height:1.1; }
+  #acertijo .pregunta { font-style:italic; font-size:clamp(22px, 4.6vmin, 68px); line-height:1.35; max-width:1500px; margin:1.2vmin 0 3.2vmin; text-shadow:0 0 18px rgba(255,90,31,.35); }
+  #acertijo .ops { display:grid; grid-template-columns:repeat(4, 1fr); gap:3vmin 2.5vw; width:100%; max-width:1600px; }
+  #acertijo .op .qr { background:#fff; padding:1.1vmin; border-radius:1.2vmin; width:min(19vw, 30vmin); aspect-ratio:1; margin:0 auto 1.4vmin; }
+  #acertijo .op .qr svg { width:100%; height:100%; display:block; }
+  #acertijo .op b { display:inline-block; width:1.6em; height:1.6em; line-height:1.6em; border-radius:50%; background:var(--hueso); color:#111; font-size:clamp(14px, 2.6vmin, 34px); margin-right:.5em; }
+  #acertijo .op span { font-size:clamp(16px, 3.2vmin, 46px); }
+  #acertijo .pie { margin-top:3vmin; color:#8a8578; font-size:clamp(12px, 1.9vmin, 22px); }
+  @media (max-aspect-ratio: 1/1) { #acertijo .ops { grid-template-columns:repeat(2, 1fr); } #acertijo .op .qr { width:min(34vw, 26vmin); } }
+  #enlace { position:absolute; left:14px; bottom:10px; z-index:3; width:9px; height:9px; border-radius:50%; background:#5b2a24; display:none; }
+  body.juego #enlace { display:block; }
+  #enlace.on { background:#3f6b3a; }
+
   /* Pantalla de inicio */
   #inicio { position:absolute; inset:0; z-index:5; background:#050505; display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding:24px; cursor:pointer; }
@@ -66,6 +84,8 @@
 </style>
 </head>
 <body>
+
+<div id="acertijo" aria-live="polite"></div>
 
 <div id="mundo" class="oculto">
 <div class="luz"></div>
@@ -123,6 +143,7 @@
 
 <div id="texto" aria-live="polite"></div>
 
+<div id="enlace" title="Conexión con los móviles"></div>
 <div id="nivel">
   <div id="nivelInfo"></div>
   <div class="barra"><i id="nivelBarra"></i><u id="nivelUmbral"></u></div>
@@ -136,6 +157,8 @@
   <div class="boton">Despertar</div>
 </div>
 
+<script src="datos.js"></script>
+<script src="pantalla.js"></script>
 <script src="frases.js"></script>
 <script src="calavera-logica.js"></script>
 <script>
@@ -153,6 +176,67 @@
   var apertura = 0, empuje = 0, vozIdx = 0, ultimoEvento = "-", ultimoNivel = 0;
   var ocupada = false, gritando = false, primera = true, timerOcultar = null;
   var timerTexto = null, timerSeguridad = null, picoMax = 0;
+
+  /* ---- Modo juego (?juego): acertijo en pantalla; al escanear una opción sale la calavera ----
+     Con ?juego&micro además reacciona al ruido como siempre. Sin micro, solo responde a los QR. */
+  var juego = /[?&]juego/.test(location.search);
+  var soloQR = juego && !/[?&]micro/.test(location.search);
+  var bolsaAcertijos = new L.Bolsa(PANTALLA.map(function (a) { return a.id; }));
+  var pendientes = [], vistos = {}, actual = 0, ultimoCambio = 0;
+
+  function esc(t) {
+    return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
+  }
+  function mostrarAcertijo(id) {
+    var a = PANTALLA.filter(function (x) { return x.id === id; })[0];
+    if (!a) return;
+    actual = id; ultimoCambio = Date.now();
+    var ops = a.opciones.map(function (t, i) {
+      return '<div class="op"><div class="qr">' + a.qr[i] + '</div><b>' + "ABCD"[i] + '</b><span>' + esc(t) + '</span></div>';
+    }).join("");
+    $("acertijo").innerHTML = '<div class="cab">Acertijo</div><div class="num">' + id + '</div>' +
+      '<p class="pregunta">' + esc(a.texto) + '</p><div class="ops">' + ops + '</div>' +
+      '<p class="pie">Escanea con el móvil la opción que creas correcta. Ojo: hay sustos.</p>';
+  }
+  function siguienteAcertijo() { mostrarAcertijo(bolsaAcertijos.siguiente()); }
+
+  /* Un móvil ha elegido la opción o del acertijo q. */
+  function respuesta(q, o) {
+    var a = ACERTIJOS.filter(function (x) { return x.id === q; })[0];
+    if (!a || !(o >= 0 && o < a.opciones.length) || pendientes.length >= 3) return;
+    var acierto = (o === a.correcta), cat = acierto ? "acierto" : "fallo";
+    pendientes.push({
+      t: Date.now(), q: q, cat: cat,
+      frase: bolsas[cat].siguiente().replace("{op}", a.opciones[o]),
+      /* como en el móvil: el acierto asusta solo a veces */
+      sinGrito: acierto && Math.random() >= PROB_SUSTO_ACIERTO
+    });
+  }
+  /* Saca la siguiente respuesta en cuanto la calavera esté libre; las que esperan demasiado se descartan. */
+  function atender() {
+    while (pendientes.length && Date.now() - pendientes[0].t > 25000) pendientes.shift();
+    if (ocupada || !pendientes.length) return false;
+    var p = pendientes.shift();
+    aparecer(p.cat, { frase: p.frase, sinGrito: p.sinGrito, juego: true });
+    if (p.q === actual) setTimeout(siguienteAcertijo, 800);   /* ya tapado por la calavera */
+    return true;
+  }
+
+  /* Los móviles avisan por ntfy.sh (j.html); aquí se escucha ese canal. */
+  function escucharMoviles() {
+    if (typeof EventSource === "undefined") return;
+    var es = new EventSource("https://ntfy.sh/" + CANAL + "/sse");
+    es.onopen = function () { $("enlace").classList.add("on"); };
+    es.onerror = function () { $("enlace").classList.remove("on"); };   /* EventSource reconecta solo */
+    es.onmessage = function (e) {
+      var m, d;
+      try { m = JSON.parse(e.data); d = JSON.parse(m.message); } catch (x) { return; }
+      if (m.event !== "message" || vistos[m.id]) return;
+      vistos[m.id] = 1;
+      if (Date.now() / 1000 - m.time > 90) return;   /* mensajes viejos que se reenvían al reconectar */
+      respuesta(d.q, d.o);
+    };
+  }
 
   /* ---- Voz ---- */
   function voces() {
@@ -203,7 +287,7 @@
     if (ocupada) return;
     opciones = opciones || {};
     ocupada = true;
-    if (primera && categoria !== "golpe") categoria = "bienvenida";
+    if (primera && categoria !== "golpe" && !opciones.juego) categoria = "bienvenida";
     primera = false;
     ultimoEvento = categoria;
     clearTimeout(timerOcultar);
@@ -320,14 +404,17 @@
   }
 
   function bucle() {
-    var ahora = Date.now(), ev;
-    if (microOk && microActivo) {
+    var ahora = Date.now(), ev = null;
+    if (soloQR) {
+      /* sin micrófono ni sorpresas: solo responde a los móviles */
+    } else if (microOk && microActivo) {
       ultimoNivel = nivelActual();
       ev = cerebro.muestra(ultimoNivel, ahora, ocupada, ultimoPico);
     } else {
       ev = cerebro.sinMicro(ahora, ocupada);
     }
-    if (ev) aparecer(ev);
+    if (juego && !ocupada && ahora - ultimoCambio > 300000) siguienteAcertijo();   /* si nadie contesta, cambia de acertijo */
+    if (!atender() && ev) aparecer(ev);
     if (debug) pintarNivel();
   }
 
@@ -355,12 +442,13 @@
       var AC = window.AudioContext || window.webkitAudioContext;
       ctx = new AC(); if (ctx.resume) ctx.resume();
     } catch (e) {}
-    try { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); } catch (e) {}
+    try { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
     try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
 
     if (window.speechSynthesis) speechSynthesis.getVoices();
     mostrarDebug(debug);
-    iniciarMicro().then(function (ok) { microOk = ok; });   /* puede tardar si piden permiso: no bloquea nada */
+    if (!soloQR) iniciarMicro().then(function (ok) { microOk = ok; });   /* puede tardar si piden permiso: no bloquea nada */
+    if (juego) escucharMoviles();
     setInterval(bucle, 50);
     requestAnimationFrame(animar);
     setTimeout(function () { $("ayuda").style.opacity = 0; }, 12000);
@@ -378,6 +466,11 @@
     if (!ctx) return;
     var k = e.key.toLowerCase();
     if (k === " ") { e.preventDefault(); aparecer("aleatoria"); }
+    else if (k === "n" && juego) siguienteAcertijo();
+    else if (k === "t" && juego) {   /* prueba sin móvil: simula una opción equivocada del acertijo en pantalla */
+      var a = ACERTIJOS.filter(function (x) { return x.id === actual; })[0];
+      if (a) respuesta(actual, (a.correcta + 1) % a.opciones.length);
+    }
     else if (k === "d") mostrarDebug(!debug);
     else if (k === "m") { microActivo = !microActivo; mostrar(microActivo ? "Os oigo." : "Me he quedado sordo. Qué descanso.", 3500); }
     else if (k === "v") { vozIdx++; var v = voces(); if (v.length) aparecer("aleatoria", { sinGrito: true, frase: "Esta es mi voz: " + v[vozIdx % v.length].name.replace(/\(.*?\)/g, "") }); }
@@ -385,6 +478,14 @@
     else if (k === "-") cerebro.o.sensibilidad = Math.max(0.25, cerebro.o.sensibilidad / 1.25);
     else if (k === "f") { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
   });
+
+  if (juego) {
+    document.body.classList.add("juego");
+    siguienteAcertijo();
+    $("inicio").querySelector("p").textContent = "Pulsa para dejarlo listo. La pantalla enseña un acertijo con un QR por respuesta: cuando alguien escanee una con el móvil, aparecerá la calavera con un grito y dirá algo.";
+    $("inicio").querySelector(".tenue").textContent = soloQR ? "En este modo no se usa el micrófono." : "El navegador pedirá permiso para usar el micrófono. El sonido no se graba ni se envía: solo se mide el volumen.";
+    $("ayuda").textContent = "Espacio: despertarla ya · T: simular un fallo · N: otro acertijo · V: voz · F: pantalla completa";
+  }
 
   if (window.speechSynthesis) speechSynthesis.onvoiceschanged = function () {};
 })();

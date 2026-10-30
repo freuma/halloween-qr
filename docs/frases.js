@@ -68,6 +68,35 @@ var FRASES = {
     "Qué pena de silencio. Con lo que me gustaban los gritos.",
     "Tranquilos. Si alguien se mueve, os aviso."
   ],
+  /* Alguien ha escaneado una respuesta equivocada. {op} se sustituye por la opción elegida. */
+  fallo: [
+    "«{op}». Qué seguridad. Qué error.",
+    "Mal. Muy mal. Con esa puntería, vais a heredar mi sitio.",
+    "¿«{op}»? Lo he oído y todavía no me lo creo.",
+    "Fallo. Ya me estoy preparando para el entierro.",
+    "No. Incorrecto. Pero al menos habéis sido valientes, que es lo que se dice de los que acaban mal.",
+    "«{op}»... La respuesta equivocada. Yo también contesté así, y mirad cómo acabé.",
+    "Qué decepción. Tengo muchas costillas, pero ninguna es para llorar.",
+    "Error. Lo siento por vosotros. No, mentira.",
+    "Os lo diré con cariño: no.",
+    "Con ese criterio, no duraríais ni una peli de terror.",
+    "Equivocado. En una peli, a vosotros os matan primero.",
+    "Cada fallo es un paso hacia mi lado de la tumba. Seguid así.",
+    "«{op}». Mis condolencias. Por vuestro cerebro."
+  ],
+  /* Respuesta correcta. */
+  acierto: [
+    "Correcto. Qué lástima, tenía el susto preparado.",
+    "«{op}». Sí. Acertasteis. No os acostumbréis.",
+    "Acierto. Por esta vez os dejo vivir.",
+    "Vaya, alguien que piensa. Eso me da más miedo que cualquier susto.",
+    "Correcto. La suerte del principiante dura poco. Lo digo por experiencia.",
+    "Bien. Muy bien. Me aburro menos cuando acertáis, así que os mataré más tarde.",
+    "Acertado. Mi respeto. Y mi envidia, que ya no tengo con qué sentir.",
+    "«{op}», sí. Qué listos. Dentro de cien años seguiréis presumiendo igual.",
+    "Correcto. Hoy os salváis. Mañana ya veremos.",
+    "Habéis acertado. Os espero en el siguiente. Siempre estoy por aquí. No tengo adónde ir."
+  ],
   aleatoria: [
     "Dicen que el trabajo mata. Yo llevo trescientos años descansando y no me va mal.",
     "Estar muerto tiene sus ventajas: no hay lunes.",

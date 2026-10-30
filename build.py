@@ -9,6 +9,7 @@ El orden de las opciones sale de una semilla fija: reimprimir un folio no lo cam
 import argparse
 import json
 import random
+import secrets
 import sys
 from html import escape
 from pathlib import Path
@@ -68,9 +69,34 @@ def preparar(origen):
     return acertijos
 
 
+def canal():
+    """Tema de ntfy.sh por el que el móvil avisa a la pantalla. Se crea una vez y se conserva."""
+    f = RAIZ / "canal.txt"
+    if not f.exists():
+        f.write_text("halloween-qr-%s\n" % secrets.token_hex(6), encoding="utf-8")
+    return f.read_text(encoding="utf-8").strip()
+
+
+def qr_svg(url):
+    q = segno.make(url, error="m")
+    ancho, alto = q.symbol_size(scale=4, border=2)
+    return q.svg_inline(scale=4, border=2).replace("<svg ", '<svg viewBox="0 0 %d %d" ' % (ancho, alto), 1)
+
+
+def escribir_pantalla(acertijos, base):
+    """docs/pantalla.js: lo que necesita la pantalla del aula para enseñar un acertijo con sus QR."""
+    base = base.rstrip("/")
+    pant = [{"id": a["id"], "texto": a["texto"], "opciones": a["opciones"],
+             "qr": [qr_svg("%s/j.html?q=%d&o=%d" % (base, a["id"], i)) for i in range(len(a["opciones"]))]}
+            for a in acertijos]
+    js = "/* Generado por build.py; no editar a mano. */\nvar PANTALLA = %s;\n" % json.dumps(pant, ensure_ascii=False)
+    (RAIZ / "docs" / "pantalla.js").write_text(js, encoding="utf-8")
+
+
 def escribir_datos(acertijos):
     web = [{k: a[k] for k in ("id", "opciones", "correcta", "premio")} for a in acertijos]
     js = "/* Generado por build.py; no editar a mano. */\n"
+    js += "var CANAL = %s;\n" % json.dumps(canal())
     js += "var PROB_SUSTO_ACIERTO = %s;\n" % PROB_SUSTO_ACIERTO
     js += "var ACERTIJOS = %s;\n" % json.dumps(web, ensure_ascii=False, indent=1)
     js += "var SUSTOS = %s;\n" % json.dumps(SUSTOS)
@@ -103,9 +129,7 @@ def escribir_folios(acertijos, base):
         ops = []
         for i, texto in enumerate(a["opciones"]):
             url = "%s/j.html?q=%d&o=%d" % (base, a["id"], i)
-            q = segno.make(url, error="m")
-            ancho, alto = q.symbol_size(scale=4, border=2)
-            qr = q.svg_inline(scale=4, border=2).replace("<svg ", '<svg viewBox="0 0 %d %d" ' % (ancho, alto), 1)
+            qr = qr_svg(url)
             ops.append('<div class="op">%s<b>%s</b><span>%s</span></div>' % (qr, "ABCD"[i], escape(texto)))
         paginas.append(
             '<section class="folio"><div class="marco">'
@@ -125,6 +149,7 @@ def main():
     args = p.parse_args()
     acertijos = preparar(json.loads((RAIZ / "acertijos.json").read_text(encoding="utf-8")))
     escribir_datos(acertijos)
+    escribir_pantalla(acertijos, args.base)
     escribir_folios(acertijos, args.base)
     print("%d acertijos. QR -> %s/j.html" % (len(acertijos), args.base.rstrip("/")))
 

@@ -1,4 +1,5 @@
 /* Generado por build.py; no editar a mano. */
+var CANAL = "halloween-qr-770c10b170ff";
 var PROB_SUSTO_ACIERTO = 0.25;
 var ACERTIJOS = [
  {
