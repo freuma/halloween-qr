@@ -1,0 +1,8 @@
+[
+  {
+    "texto": "Quien me fabrica, no me quiere. Quien me compra, no me usa. Y quien me usa, ya no se entera.",
+    "correcta": "Un ataúd",
+    "falsas": ["Un disfraz", "Una escoba de bruja", "Un caldero"],
+    "premio": "Descanse en paz. Pero tú todavía no: aún te queda mucho juego."
+  }
+]

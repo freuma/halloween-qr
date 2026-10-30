@@ -54,9 +54,9 @@ SUSTOS = [
 ]
 
 
-def preparar(origen):
+def preparar(origen, primer_id=1, pantalla=False):
     acertijos = []
-    for i, a in enumerate(origen, start=1):
+    for i, a in enumerate(origen, start=primer_id):
         opciones = [a["correcta"]] + a["falsas"]
         random.Random(i).shuffle(opciones)
         acertijos.append({
@@ -65,6 +65,7 @@ def preparar(origen):
             "opciones": opciones,
             "correcta": opciones.index(a["correcta"]),
             "premio": a["premio"],
+            "pantalla": pantalla,
         })
     return acertijos
 
@@ -86,7 +87,7 @@ def qr_svg(url):
 def escribir_pantalla(acertijos, base):
     """docs/pantalla.js: lo que necesita la pantalla del aula para enseñar un acertijo con sus QR."""
     base = base.rstrip("/")
-    pant = [{"id": a["id"], "texto": a["texto"], "opciones": a["opciones"],
+    pant = [{"id": a["id"], "cab": "El acertijo de la calavera", "num": "", "texto": a["texto"], "opciones": a["opciones"],
              "qr": [qr_svg("%s/j.html?q=%d&o=%d" % (base, a["id"], i)) for i in range(len(a["opciones"]))]}
             for a in acertijos]
     js = "/* Generado por build.py; no editar a mano. */\nvar PANTALLA = %s;\n" % json.dumps(pant, ensure_ascii=False)
@@ -94,7 +95,7 @@ def escribir_pantalla(acertijos, base):
 
 
 def escribir_datos(acertijos):
-    web = [{k: a[k] for k in ("id", "opciones", "correcta", "premio")} for a in acertijos]
+    web = [{k: a[k] for k in ("id", "opciones", "correcta", "premio", "pantalla")} for a in acertijos]
     js = "/* Generado por build.py; no editar a mano. */\n"
     js += "var CANAL = %s;\n" % json.dumps(canal())
     js += "var PROB_SUSTO_ACIERTO = %s;\n" % PROB_SUSTO_ACIERTO
@@ -148,8 +149,9 @@ def main():
                    help="dirección pública de la carpeta docs/ (sin barra final)")
     args = p.parse_args()
     acertijos = preparar(json.loads((RAIZ / "acertijos.json").read_text(encoding="utf-8")))
-    escribir_datos(acertijos)
-    escribir_pantalla(acertijos, args.base)
+    solo_pantalla = preparar(json.loads((RAIZ / "acertijo-pantalla.json").read_text(encoding="utf-8")), 101, True)
+    escribir_datos(acertijos + solo_pantalla)
+    escribir_pantalla(solo_pantalla, args.base)
     escribir_folios(acertijos, args.base)
     print("%d acertijos. QR -> %s/j.html" % (len(acertijos), args.base.rstrip("/")))
 

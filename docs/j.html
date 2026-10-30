@@ -72,6 +72,8 @@
   opcionEl.textContent = acertijo.opciones[o];
 
   var acierto = (o === acertijo.correcta);
+  /* Los acertijos de la pantalla del aula no cuentan en el progreso del móvil. */
+  var TOTAL = ACERTIJOS.filter(function (a) { return !a.pantalla; }).length;
   var hecho = false;
 
   /* Progreso guardado en el propio móvil; si no hay almacenamiento, no pasa nada. */
@@ -80,6 +82,7 @@
   }
   function guardarResuelto(id) {
     var r = leerResueltos();
+    if (acertijo.pantalla) return r.length;
     if (r.indexOf(id) === -1) r.push(id);
     try { localStorage.setItem("resueltos", JSON.stringify(r)); } catch (e) {}
     return r.length;
@@ -161,21 +164,22 @@
       titulo.textContent = "Correcto";
       mensaje.textContent = acertijo.premio;
       nota.textContent = conSusto ? "El susto era de regalo." : "";
-      document.getElementById("contador").textContent = "Acertijos resueltos: " + total + " de " + ACERTIJOS.length;
+      document.getElementById("contador").textContent = (acertijo.pantalla ? "" : "Acertijos resueltos: " + total + " de " + TOTAL);
     } else {
       res.className = "resultado mal";
       titulo.textContent = "Has fallado";
-      mensaje.textContent = "Otra opción de este folio puede salvarte.";
+      mensaje.textContent = acertijo.pantalla ? "Otra opción de la pantalla puede salvarte." : "Otra opción de este folio puede salvarte.";
       nota.textContent = "";
       var r = leerResueltos().length;
-      if (r) document.getElementById("contador").textContent = "Acertijos resueltos: " + r + " de " + ACERTIJOS.length;
+      if (r && !acertijo.pantalla) document.getElementById("contador").textContent = "Acertijos resueltos: " + r + " de " + TOTAL;
     }
     res.hidden = false;
   }
 
-  /* Si hay una pantalla del aula escuchando (calavera.html?juego), le llega qué opción se ha elegido.
+  /* Solo los acertijos de la pantalla (calavera.html?juego) avisan a la calavera; los folios no.
      Va por ntfy.sh; si falla, el juego del móvil sigue igual. */
   function avisarPantalla() {
+    if (!acertijo.pantalla) return;
     try {
       fetch("https://ntfy.sh/" + CANAL, { method: "POST", body: JSON.stringify({ q: q, o: o }), keepalive: true }).catch(function () {});
     } catch (e) {}

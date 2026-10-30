@@ -194,7 +194,7 @@
     var ops = a.opciones.map(function (t, i) {
       return '<div class="op"><div class="qr">' + a.qr[i] + '</div><b>' + "ABCD"[i] + '</b><span>' + esc(t) + '</span></div>';
     }).join("");
-    $("acertijo").innerHTML = '<div class="cab">Acertijo</div><div class="num">' + id + '</div>' +
+    $("acertijo").innerHTML = '<div class="cab">' + esc(a.cab) + '</div>' + (a.num ? '<div class="num">' + esc(a.num) + '</div>' : '') +
       '<p class="pregunta">' + esc(a.texto) + '</p><div class="ops">' + ops + '</div>' +
       '<p class="pie">Escanea con el móvil la opción que creas correcta. Ojo: hay sustos.</p>';
   }
@@ -203,7 +203,8 @@
   /* Un móvil ha elegido la opción o del acertijo q. */
   function respuesta(q, o) {
     var a = ACERTIJOS.filter(function (x) { return x.id === q; })[0];
-    if (!a || !(o >= 0 && o < a.opciones.length) || pendientes.length >= 3) return;
+    var deLaPantalla = PANTALLA.some(function (x) { return x.id === q; });
+    if (!a || !deLaPantalla || !(o >= 0 && o < a.opciones.length) || pendientes.length >= 3) return;
     var acierto = (o === a.correcta), cat = acierto ? "acierto" : "fallo";
     pendientes.push({
       t: Date.now(), q: q, cat: cat,
